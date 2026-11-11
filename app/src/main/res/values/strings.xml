@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">BezelPop</string>
+    <string name="service_description">Listens for hardware button presses and draws a small bezel bulge overlay while a button is held. It does not read screen content.</string>
+</resources>
