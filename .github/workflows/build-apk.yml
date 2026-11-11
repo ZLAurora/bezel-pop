@@ -29,8 +29,13 @@ jobs:
       - name: Install Native Gradle
         run: sudo apt-get update && sudo apt-get install -y gradle
 
+      - name: Create Direct Gradle Wrapper Script
+        run: |
+          printf '#!/usr/bin/env sh\nexec gradle "$@"\n' > gradlew
+          chmod +x gradlew
+
       - name: Build Debug and Release APKs
-        run: gradle assembleDebug assembleRelease --no-daemon --stacktrace
+        run: ./gradlew assembleDebug assembleRelease --no-daemon --stacktrace
 
       - name: Upload APK artifacts
         uses: actions/upload-artifact@v4
