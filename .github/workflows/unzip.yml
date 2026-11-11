@@ -1,0 +1,56 @@
+name: Unzip Project
+
+on:
+  push:
+    paths:
+      - 'BezelPop.zip'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  unzip:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Extract BezelPop.zip and preserve folder structure
+        run: |
+          if [ ! -f "BezelPop.zip" ]; then
+            echo "BezelPop.zip not found in repository root."
+            exit 1
+          fi
+
+          # Remove old project directories/files so obsolete files from v1 don't cause conflicts
+          rm -rf app gradle build.gradle.kts settings.gradle.kts gradle.properties gradlew gradlew.bat README.md .gitignore
+
+          # Unzip into a temporary folder first to inspect structure safely
+          mkdir -p _extracted
+          unzip -o BezelPop.zip -d _extracted
+
+          # Handle both cases: zip contains a top-level 'BezelPop/' folder OR files directly at root
+          if [ -d "_extracted/BezelPop" ]; then
+            rm -rf _extracted/BezelPop/.github
+            cp -a _extracted/BezelPop/. .
+          else
+            rm -rf _extracted/.github
+            cp -a _extracted/. .
+          fi
+
+          # Clean up temporary files and the zip archive
+          rm -rf _extracted BezelPop.zip
+
+      - name: Commit and push extracted files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "Extract BezelPop.zip"
+            git push
+    
+          fi
