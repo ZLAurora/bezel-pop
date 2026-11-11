@@ -1,0 +1,82 @@
+
+name: Unpack BezelPop v2 and build APK
+
+on:
+  push:
+    branches:
+      - bezelpop-v2-redesign
+    paths:
+      - 'BezelPop-v2-source.zip'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  unpack-and-build:
+    if: github.ref_name == 'bezelpop-v2-redesign' && github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+
+      - name: Verify source ZIP
+        run: |
+          test -f BezelPop-v2-source.zip || {
+            echo "Source ZIP not found in repository root."
+            exit 1
+          }
+
+      - name: Extract Android project
+        run: |
+          mkdir -p /tmp/bezelpop-source
+          unzip -q BezelPop-v2-source.zip -d /tmp/bezelpop-source
+
+          test -f /tmp/bezelpop-source/BezelPop/settings.gradle.kts || {
+            echo "Android project structure not found in ZIP."
+            exit 1
+          }
+
+          # Merge project contents into repository root.
+          # Existing workflow files are preserved unless
+          # the ZIP contains a file with the same name.
+          cp -a /tmp/bezelpop-source/BezelPop/. .
+
+          # Remove the uploaded archive after extraction.
+          rm BezelPop-v2-source.zip
+
+      - name: Commit extracted project
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add -A
+
+          if ! git diff --cached --quiet; then
+            git commit -m "Unpack BezelPop v2 Android project"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Build APKs
+        run: gradle assembleDebug assembleRelease --no-daemon --stacktrace
+
+      - name: Upload APKs
+        uses: actions/upload-artifact@v4
+        with:
+          name: BezelPop-v2-APKs
+          path: app/build/outputs/apk/**/*.apk
+          if-no-files-found: error
