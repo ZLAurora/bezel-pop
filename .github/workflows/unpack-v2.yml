@@ -43,7 +43,9 @@ jobs:
           # Merge project contents into repository root.
           # Existing workflow files are preserved unless
           # the ZIP contains a file with the same name.
-          cp -a /tmp/bezelpop-source/BezelPop/. .
+          # Copy project files, excluding GitHub Actions workflows.
+          rsync -a --exclude='.github/workflows/' \
+          /tmp/bezelpop-source/BezelPop/ ./
 
           # Remove the uploaded archive after extraction.
           rm BezelPop-v2-source.zip
