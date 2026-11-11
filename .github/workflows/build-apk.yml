@@ -1,3 +1,10 @@
+embleRelease --no-daemon --stacktrace
+
+      - name: Upload APK artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: BezelPop-apks
+          path: app/build/outputs/apk/**/*.apk
 name: Build APK
 
 on:
@@ -26,17 +33,11 @@ jobs:
       - name: Create local.properties
         run: echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
 
-      - name: Install Gradle CLI
+      - name: Install Native Gradle
         run: sudo apt-get update && sudo apt-get install -y gradle
 
-      - name: Generate Gradle Wrapper
-        run: gradle wrapper --gradle-version 8.7
-
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-
       - name: Build Debug and Release APKs
-        run: ./gradlew assembleDebug assembleRelease --no-daemon --stacktrace
+        run: gradle assembleDebug assembleRelease --no-daemon --stacktrace
 
       - name: Upload APK artifacts
         uses: actions/upload-artifact@v4
