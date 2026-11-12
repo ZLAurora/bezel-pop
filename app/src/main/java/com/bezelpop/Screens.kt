@@ -3,6 +3,9 @@
 package com.bezelpop
 
 import android.content.ComponentName
+
+import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.shape.CircleShape
