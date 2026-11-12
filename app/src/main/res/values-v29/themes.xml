@@ -1,6 +1,0 @@
-<resources>
-    <style name="Theme.BezelPop" parent="android:Theme.DeviceDefault.DayNight">
-        <item name="android:windowNoTitle">true</item>
-        <item name="android:windowActionBar">false</item>
-    </style>
-</resources>
